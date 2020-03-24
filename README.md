@@ -1,13 +1,12 @@
-# aspnet-core-docker-ssl
-Example Docker Compose configuration for ASP.NET Core and Let's Encrypt.
+# Usage
 
-Copy _Dockerfile_ and _docker-compose.yml_ to your own project before continuing.
+Copy _Dockerfile_,  _docker-compose.yml_ and _.dockerignore_ to the root of your ASP.NET Core project.
 
-## Configuration
+# Configuration
 
-### Docker
+## Docker Compose
 
-Create a file called _.env_ in the same folder as _docker-compose.yml_ and set the required environment variables:
+Create a file called _.env_ in the same directory as _docker-compose.yml_ and set the required environment variables:
 
 ```
 # Change these
@@ -18,13 +17,13 @@ POSTGRES_PASSWORD=Password1.
 
 Make sure to include both the bare domain and the www sub-domain in HOST as shown above.
 
-### Application
+## Dockerfile
 
 Update the last line of _Dockerfile_ with the name of your ASP.NET Core project. The name is case sensitive. 
 
 `ENTRYPOINT ["dotnet", "Example.dll"]`
 
-## Build your application
+# Build your application
 
 You should build your application first to make sure everything is working.
 
@@ -32,7 +31,7 @@ You should build your application first to make sure everything is working.
 
 This will pull all the build requirements and build your application.
 
-## Start containers
+# Start containers
 
 I recommend starting PostgreSQL first as the first startup takes a while.
 
@@ -48,7 +47,7 @@ You can check the logs to see if everything is working:
 
 Press Ctrl+C to close logs.
 
-## Redirect to www
+# Redirect to www
 
 If you want your bare domain to redirect to the www sub-domain you must add a line to the configuration file for the bare domain, like this:
 

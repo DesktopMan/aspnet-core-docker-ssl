@@ -41,7 +41,7 @@ In _appsettings.json_:
 ```
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=db;Port=5432;Username=postgres;Password=Password1.;Database=postgres;"
+    "DefaultConnection": "Host=postgres;Port=5432;Username=postgres;Password=Password1.;Database=postgres;"
   },
   "Logging": {
     ...

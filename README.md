@@ -55,7 +55,7 @@ In _appsettings.json_:
 The database initializer should behave different in development vs production, and because of this it needs to know what environment we are in:
 
 ```
-var host = CreateWebHostBuilder(args).Build();
+var host = CreateHostBuilder(args).Build();
 
 using (var scope = host.Services.CreateScope())
 {
@@ -65,7 +65,7 @@ using (var scope = host.Services.CreateScope())
     var context = services.GetRequiredService<ExampleDbContext>();
 
     // Get the environment so we can check if this is running in development or otherwise
-    var environment = services.GetService<IHostingEnvironment>();
+    var environment = services.GetService<IHostEnvironment>();
 
     // Initialise the database using the initializer from Data/ExampleDbInitializer.cs
     DbInitializer.Initialize(context, environment.IsDevelopment());
@@ -80,17 +80,17 @@ The _Startup_ class needs to be updated so it also receives the environment in i
 
 ```
 // The second parameter has been added so we can get the current environment in ConfigureServices
-public Startup(IConfiguration configuration, IHostingEnvironment environment)
+public Startup(IConfiguration configuration, IHostEnvironment environment)
 {
     Configuration = configuration;
     Environment = environment;
 }
 
 public IConfiguration Configuration { get; }
-public IHostingEnvironment Environment { get; }
+public IHostEnvironment Environment { get; }
 ```
 
-_ConfigureServices()_ needs to be udated to use the appropriate connection string for each environment:
+_ConfigureServices()_ needs to be updated to use the appropriate connection string for each environment:
 
 ```
 if (Environment.IsDevelopment()) // Database used during development
@@ -166,26 +166,35 @@ This will pull all the build requirements and build your application.
 
 # Start containers
 
+## 1. PostgreSQL database
+
 I recommend starting PostgreSQL first as the first startup takes a while.
 
-`docker-compose up -d postgres` 
+`docker-compose up -d postgres`
 
-Wait 5 seconds or so and start the rest of the containers:
+## 2. Nginx proxy
 
-`docker-compose up -d`
+First start the container:
 
-You can check the logs to see if everything is working:
+`docker-compose up -d nginx-proxy`
 
-`docker-compose logs` 
-
-Press Ctrl+C to close logs.
-
-# Redirect to www
-
-If you want your bare domain to redirect to the www sub-domain you must add a line to the configuration file for the bare domain, like this:
+Then configure the www-forwarding and restart it:
 
 ```
 HOST=example.org # Change this
-VOLUME=$(docker volume inspect --format '{{ .Mountpoint }}' aspnet-core-docker-ssl_nginx-vhost)
+VOLUME=$(docker volume inspect --format '{{ .Mountpoint }}' $(basename $PWD)_nginx-vhost)
 echo "return 301 \$scheme://www.$HOST\$request_uri;" >> $VOLUME/$HOST
+docker-compose restart nginx-proxy
 ```
+
+## 3. Start the rest
+
+`docker-compose up -d`
+
+## Checking for errors
+
+You can check the logs to see if everything is working:
+
+`docker-compose logs`
+
+Press Ctrl+C to close logs.

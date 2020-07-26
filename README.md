@@ -139,7 +139,7 @@ public static class DbInitializer
 
 ### Create your database and schema
 
-Now make sure you have the lastes migrations files of your database schema.
+Now make sure you have the latest migrations files of your database schema.
 
 ```
 dotnet ef migrations add InitialCreate

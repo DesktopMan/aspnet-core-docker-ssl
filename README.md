@@ -2,7 +2,7 @@
 
 ## Copy files
 
-Copy _Dockerfile_,  _docker-compose.yml_ and _.dockerignore_ to the root of your ASP.NET Core project.
+Copy _Dockerfile_, _docker-compose.yml_ and _.dockerignore_ to the root of your ASP.NET Core project.
 
 ## Install packages
 
@@ -137,6 +137,14 @@ public static class DbInitializer
 }
 ```
 
+### Create your database and schema
+
+Now make sure you have the lastes migrations files of your database schema.
+
+```
+dotnet ef migrations add InitialCreate
+```
+
 ## Docker Compose
 
 Create a file called _.env_ in the same directory as _docker-compose.yml_ and set the required environment variables:
@@ -152,7 +160,7 @@ Make sure to include both the bare domain and the www sub-domain in HOST as show
 
 ## Dockerfile
 
-Update the last line of _Dockerfile_ with the name of your ASP.NET Core project. The name is case sensitive. 
+Update the last line of _Dockerfile_ with the name of your ASP.NET Core project. The name is case sensitive.
 
 `ENTRYPOINT ["dotnet", "Example.dll"]`
 
@@ -198,3 +206,31 @@ You can check the logs to see if everything is working:
 `docker-compose logs`
 
 Press Ctrl+C to close logs.
+
+---
+
+Every time you make changes to your models that may change the database scheme, you will have to migrate.
+
+```
+# Delete old migrations files
+rm -rf Migrations
+
+# Create new migration
+dotnet ef migrations add InitialCreate
+
+# Stop and remove application and the database server
+docker-compose rm -fs application postgres
+
+# Remove the existing database volume
+docker volume ls # Find the name / ID it should end with postgres-data
+docker volume rm <name or id>
+
+# Restart the database server (now with empty database)
+docker-compose up -d postgres
+
+# Build and start application with the new migration
+docker-compose build
+docker-compose up -d application
+```
+
+For more about migrations see https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/?tabs=dotnet-core-cli
